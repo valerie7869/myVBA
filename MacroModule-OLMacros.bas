@@ -1,4 +1,4 @@
-Attribute VB_Name = "MacroModule"
+Attribute VB_Name = "OpenLogicMacros"
 Option Explicit
 Sub ExtractExtensions_v1()
 'reads filename column and writes to extension column
