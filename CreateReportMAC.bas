@@ -4,7 +4,7 @@ Sub CreateReportMAC_v4_1_dev()
 ' createReport4.1 - development version
 ' last updates: Mar-2015
 ' add 'Software Model' col to Files, add by-License BOM, and SoftwareModel Pivot
-' must start with: open 6 sheet OLEX export (tabs: Files, Packages, Licenses, Conflicts, Obigations, Usage)
+' must start with: open 6 sheet OLEX export (tabs: Files, Packages, Licenses, Conflicts, Obligations, Usage)
 'note reference to OpenLogicMacros.xlam to move in the Summary page
 '  also note: to modify the default summary page, user can add new Summary tab from 'Edit Menu'
 '
@@ -443,63 +443,4 @@ BailOut:
     Application.StatusBar = ""   ' clear
     Application.StatusBar = False   ' reset from top
 
-End Sub
-Sub ExtractFilename_v1()
-'assumed in file is fossy export with Fullpath
-'reads pathname column and writes to Filename column
-' MUST HAVE columns: Filename, extionsion
-'
-    Dim thisSheet As Excel.Worksheet
-    Dim myTable As ListObject
-    Dim myRow As ListRow
-
-    Dim sheetName As String
-    Dim rowIndex As Long
-    Dim checkCount As Long
-    Dim nodeCount As Integer
-    Dim nodeIndex As Integer
-    Dim rowCount As Long
-    
-    Dim FilenameCol As Integer
-    Dim FullPathCol As Integer
-    
-    Dim thisNode As String
-    Dim FullPathText As String
-    Dim newPath As String
-    
-    Dim message1 As String
-    message1 = "WARNING: 'Filename' column expected for output and." & vbCrLf
-    message1 = message1 & "                  'FullPath' column expected for parsing." & vbCrLf
-    message1 = message1 & "Do you want to continue?"
-    If MsgBox(message1, vbYesNo + vbQuestion, "Requirements:") = vbNo Then Exit Sub
-    
-    
-     Set myTable = ActiveSheet.ListObjects(1)
-     Set myRow = myTable.ListRows(1)    ' init to row 1
-     myRow.Range.Select
-
-     ' setup column pointers based on olex-given column headings
-     FullPathCol = myTable.ListColumns("FullPath").Index 'get column number for indexing
-     FilenameCol = myTable.ListColumns("Filename").Index 'get column number for indexing
-
-    rowCount = myTable.ListRows.Count
-    checkCount = 0
-             
-    For rowIndex = 1 To rowCount Step 1  ' work each row loop
-        newPath = ""        'reset for each new row
-        'myTable.ListRows(rowIndex).Range.Select       ' get/select each row
-        FullPathText = Cells(rowIndex + 1, FullPathCol).text       ' get the FullPath field
-        nodeCount = dhCountTokens(FullPathText, "/")    ' delimeter for filename start
-        ' start node loop
-        For nodeIndex = 1 To nodeCount Step 1           ' loop thru each node
-            thisNode = dhExtractString(FullPathText, nodeIndex, "/")
-            If nodeIndex = nodeCount Then   ' got last node?- then must be filename
-                     Cells(rowIndex + 1, FilenameCol).FormulaR1C1 = thisNode
-            Else
-                    newPath = newPath & "/" & thisNode      'newpath = FillPath minus last node (filename is dropped)
-            End If
-        Next nodeIndex
-        Cells(rowIndex + 1, FullPathCol).FormulaR1C1 = newPath      ' replace FullPath with Path
-        
-    Next rowIndex
 End Sub
