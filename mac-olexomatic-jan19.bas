@@ -1,4 +1,4 @@
-Attribute VB_Name = "Module1"
+Attribute VB_Name = "OlexomaticMAC2011_011917"
 Option Explicit
 
 Dim position As Long
@@ -1037,11 +1037,11 @@ row = 1 ' output grid
    '                    copyRightStr = Chr("&H28") & Chr("&HBF") & Chr("&H29"))
    '                     cleanText1 = Replace(cleanText1, weirdStr, copyRightStr)
                         'Debug.Print cleanText1
-                    'replace the unicode character "Œ" if there
+                    'replace the unicode character "ÂŒ" if there
                     '    Range("tblFiles[Confirmed Packages]").Replace
                         On Error GoTo 0
-                        cleanText1 = Replace(cleanText1, "Œ", vbNullString)
-                        cleanText1 = Replace(cleanText1, "í", vbNullString)
+                        cleanText1 = Replace(cleanText1, "ÂŒ", vbNullString)
+                        cleanText1 = Replace(cleanText1, "Ã­", vbNullString)
                         cleanText1 = Replace(cleanText1, "h2>", "h5>")  ' make smaller the title
                         cleanText1 = Replace(cleanText1, "<h1><li>", "<h4>")
                         cleanText1 = Replace(cleanText1, "</li></h1>", "</h4>")
