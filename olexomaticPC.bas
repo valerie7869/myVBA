@@ -739,7 +739,7 @@ ws.Name = "json_bom"
         "C1"), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:= _
         xlSortNormal
     With ActiveWorkbook.Worksheets("json_obligations").Sort
-        .SetRange Range("A2:I700")
+        .SetRange Range("A2:I2" & lastRow)
         .Header = xlNo
         .MatchCase = False
         .Orientation = xlTopToBottom
