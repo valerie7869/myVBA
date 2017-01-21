@@ -515,7 +515,7 @@ Dim packageListCol, cell, tempRange, theTable As Range
 Dim url, tempString, message1 As String
 Dim debug1 As Boolean
 Dim reportIn As String
-
+Application.ScreenUpdating = False
 Application.DisplayAlerts = False  ' do not ask to confirm deletes
 
 createFiles = False
@@ -533,7 +533,7 @@ Else
 Workbooks.Open Filename:=reportIn
 End If
 
-'DoEvents
+DoEvents        ' to make sure it opens
 
 Set wbReport = ActiveWorkbook
 Set wbMacro = ThisWorkbook
@@ -610,8 +610,14 @@ With wbMacro.Sheets("json_summary")
     .Range("B10") = wbReport.Sheets("Summary").Range("Summary.ReportIntro").Value
     .Range("B11") = wbReport.Sheets("Summary").Range("Summary.ReportDisclaim1").Value
     .Range("B12") = wbReport.Sheets("Summary").Range("Disclaim2").Value
-    .Range("B13") = wbReport.Sheets("Summary").Range("HelpBOM").Value
-    .Range("B14") = wbReport.Sheets("Summary").Range("HelpCVE").Value
+    tempString = wbReport.Sheets("Summary").Range("HelpBOM").Value
+    tempString = "<pre>" & tempString
+    .Range("B13") = tempString
+'    .Range("B13") = wbReport.Sheets("Summary").Range("HelpBOM").Value
+    tempString = wbReport.Sheets("Summary").Range("HelpCVE").Value
+    tempString = "<pre>" & tempString
+    .Range("B14") = tempString
+'    .Range("B14") = wbReport.Sheets("Summary").Range("HelpCVE").Value
 
     Range("A1:B14").Select
     Selection.Copy
@@ -721,21 +727,26 @@ ws.Name = "json_bom"
     DoEvents
     Range("A2:A" & lastRow).Value = Range("A2:A" & lastRow).Value   ' paste values over vlookup formula
     
- Columns("A:A").Select
+    Range("C2").Select
+    tempRange = Range(Selection, Selection.End(xlDown)).Select
+
+ '   tempRange = Range("C2:C" & lastRow).FillDown
+ '   tempRange = Selection
+ 'jan20
+    Columns("C:C").Select
     ActiveWorkbook.Worksheets("json_obligations").Sort.SortFields.Clear
     ActiveWorkbook.Worksheets("json_obligations").Sort.SortFields.Add Key:=Range( _
-        "A1"), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:= _
+        "C1"), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:= _
         xlSortNormal
     With ActiveWorkbook.Worksheets("json_obligations").Sort
-        .SetRange Range("A2:I215")
+        .SetRange Range("A2:I700")
         .Header = xlNo
         .MatchCase = False
         .Orientation = xlTopToBottom
         .SortMethod = xlPinYin
         .Apply
     End With
-    
-Range("A1").Select      ' landing for json tab
+    Range("A1").Select
     
     'Sheets("Obligations Details").Select
 '''' convert theTable to JSON for Obligations
@@ -777,9 +788,12 @@ Range("A1").Select      ' landing for json tab
     wbMacro.Sheets("json_bylicense").Range("A1") = "LicenseType"
 '''' convert theTable to JSON for byLicense
     Application.CutCopyMode = False
+    
+    wbReport.Close Savechanges:=False
     Range("A1").Select
     Debug.Print "Convert byLicense to json"
     
+    Application.ScreenUpdating = True
 '    Selection = Nothing
     
 MsgBox ("Completed json tabs")
@@ -918,7 +932,11 @@ row = 1 ' output grid
             textPosition = textPosition + tempLen + 1
             On Error Resume Next
             cleanText1 = Application.WorksheetFunction.Clean(licenseText)
-            cleanText1 = licenseText
+ 
+     DoEvents
+    ' cleanText1 = StrConv(cleanText1, vbUnicode)
+     DoEvents
+ '           cleanText1 = licenseText
         'replace the unicode character "Â" if there
         '    Range("tblFiles[Confirmed Packages]").Replace
             On Error GoTo 0
@@ -927,6 +945,13 @@ row = 1 ' output grid
             cleanText1 = Replace(cleanText1, "h2>", "h4>")  ' make smaller the title
             cleanText1 = Replace(cleanText1, "<h1><li>", "<h3>")
             cleanText1 = Replace(cleanText1, "</li></h1>", "</h3>")
+            
+            cleanText1 = Replace(cleanText1, "â€", """")
+            cleanText1 = Replace(cleanText1, "â€œ", """")
+            cleanText1 = Replace(cleanText1, "ï¿½", "©")
+            cleanText1 = Replace(cleanText1, "œ", "")
+'            cleanText1 = Replace(cleanText1, "&H0D", "")
+'            cleanText1 = Replace(cleanText1, "&HAC", "")
             
  If createFiles = True Then     ' make new json files, else only make json_tabs
             fileOutLic.write " ""license_id"" : """ & licenseID & """," & vbCrLf
@@ -1118,6 +1143,7 @@ For Each cell In Selection
     myRequest.SetRequestHeader "Accept", "application/vnd.openlogic.olexgovernance+xml"
     Debug.Print "get: " & packageID
     myRequest.Send      'pull trigger
+    DoEvents
     Debug.Print Now
     theResponse.LoadXML myRequest.responseText
     theResponseString = myRequest.responseText
@@ -1144,13 +1170,15 @@ For Each cell In Selection
      packageDesc = "N/A" ' set default if fails
      'description should also include usage notes:
      packageDesc = getTag2("description>", theResponseString)
-'     packageDesc = Replace(packageDesc, vbLf, "\n")
 '    packageDesc = Replace(packageDesc, vbCr, "\n")
 '    packageDesc = Replace(packageDesc, vbCrLf, "\n")
      packageDesc = Replace(packageDesc, "   <![CDATA[", "")    ' unneeded XML data
      packageDesc = Replace(packageDesc, "]]>", "")    ' unneeded XML data
      'packageDesc = Replace(packageDesc, "href=", "href=\")
      cleanDesc = Application.WorksheetFunction.Clean(packageDesc)
+     DoEvents
+     packageDesc = Replace(cleanDesc, "&H0D", "")
+     DoEvents
      'Debug.Print packageDesc
      'Debug.Print cleanDesc
      
